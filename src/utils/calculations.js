@@ -161,7 +161,7 @@ export function calculateAllianzSIP({ targetPremium, excessPremium, annualRate, 
     }
   }
 
-  return { totalInvested, finalValue: accountValue, history };
+  return { totalInvested, finalValue: accountValue, history, faceAmount };
 }
 
 // -------------------------------------------------------------

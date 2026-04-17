@@ -299,8 +299,15 @@ export default function AdvisorCalculator() {
                     )}
                   </div>
                   {lumpSumParams.reinvestType !== 'none' && lumpResult.reinvestResult && (
-                    <div style={{ fontSize: '13px', color: '#718096', marginTop: '4px' }}>
-                      (其中定額滾存終值：{formatMoney(lumpResult.reinvestResult.finalValue)})
+                    <div style={{ padding: '12px', background: 'rgba(0,0,0,0.03)', borderRadius: '6px', marginTop: '12px', textAlign: 'left' }}>
+                      <div style={{ fontSize: '13px', color: '#4A5568', fontWeight: 'bold' }}>
+                        🔹 其中定額滾存終值：<span className="text-success">{formatMoney(lumpResult.reinvestResult.finalValue)}</span>
+                      </div>
+                      {lumpSumParams.reinvestType === 'insurance' && lumpResult.reinvestResult.faceAmount && (
+                        <div style={{ fontSize: '14px', color: '#d97706', marginTop: '6px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          🛡️ 額外獲得防護罩：<span style={{ fontSize: '16px' }}>{formatMoney(lumpResult.reinvestResult.faceAmount)}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
