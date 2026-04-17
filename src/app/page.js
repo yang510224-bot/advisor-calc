@@ -235,10 +235,35 @@ export default function AdvisorCalculator() {
               </div>
             </div>
 
-            <div style={{ padding: '20px', background: 'var(--bg-color)', borderRadius: '8px', marginTop: '16px', textAlign: 'center' }}>
-              <h3>歷經 {lumpSumParams.years} 年滾存後終值： <span className="text-success" style={{ fontSize: '28px' }}>{formatMoney(lumpResult.finalValue)}</span></h3>
-              <p style={{ color: 'var(--text-light)' }}>已涵蓋安達前四年 (0.2% ~ 0.13%) 資金管理費階梯遞減以及甲型危險保費核算</p>
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '24px' }}>
+              <div style={{ flex: '1 1 45%', padding: '20px', background: 'rgba(46, 125, 50, 0.05)', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(46, 125, 50, 0.2)' }}>
+                <h3 style={{ color: 'var(--success-color)' }}>📈 A. 單筆全額滾存 (不配息)</h3>
+                <p style={{ fontSize: '14px', color: 'var(--text-light)', marginBottom: '16px' }}>利息全數再投資，挑戰極限複利</p>
+                <div style={{ marginBottom: '8px' }}>歷經 {lumpSumParams.years} 年後保單現值：</div>
+                <div className="text-success" style={{ fontSize: '32px', fontWeight: 'bold' }}>{formatMoney(lumpResult.accFinalValue)}</div>
+              </div>
+
+              <div style={{ flex: '1 1 45%', padding: '20px', background: 'rgba(198, 40, 40, 0.05)', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(198, 40, 40, 0.2)' }}>
+                <h3 style={{ color: 'var(--danger-color)' }}>💸 B. 單筆月配息 (維持 {lumpSumParams.annualRate}%)</h3>
+                <p style={{ fontSize: '14px', color: 'var(--text-light)', marginBottom: '16px' }}>利息全數以現金領出，本金獨自承擔隱含費用</p>
+                <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '16px' }}>
+                   <div>
+                     <div style={{ fontSize: '13px', color: '#718096' }}>累積已領配息總和</div>
+                     <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#4A5568' }}>{formatMoney(lumpResult.divTotalDistributed)}</div>
+                   </div>
+                   <div>
+                     <div style={{ fontSize: '13px', color: '#718096' }}>最終剩餘保單現值</div>
+                     <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#4A5568' }}>{formatMoney(lumpResult.divPrincipal)}</div>
+                   </div>
+                </div>
+                <div style={{ borderTop: '1px dashed #CBD5E0', paddingTop: '16px' }}>
+                  <div style={{ fontSize: '14px' }}>總資產 (配息＋剩餘本金)：</div>
+                  <div className="text-danger" style={{ fontSize: '28px', fontWeight: 'bold' }}>{formatMoney(lumpResult.divTotalAsset)}</div>
+                </div>
+              </div>
             </div>
+            
+            <p style={{ color: 'var(--text-light)', textAlign: 'center', marginTop: '16px', fontSize: '13px' }}>*以上試算皆已精準涵蓋安達前四年 (0.2% ~ 0.13%) 資金管理費階梯遞減、以及每月隨保單價值與年紀變動之甲型危險保費核算。</p>
           </div>
         )}
 

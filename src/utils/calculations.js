@@ -170,15 +170,17 @@ export function calculateAllianzSIP({ targetPremium, excessPremium, annualRate, 
 export function calculateChubbLumpSum({ lumpSum, annualRate, years, age, gender, faceAmount, isHighPremium = true }) {
   const months = years * 12;
   const monthlyRate = (annualRate / 100) / 12;
-  let accountValue = lumpSum;
+  
+  let accValue = lumpSum;
+  let divValue = lumpSum;
+  let totalDivDistributed = 0;
+  
   let currentAge = age;
   const history = [];
 
   for (let m = 1; m <= months; m++) {
     const yearIndex = Math.ceil(m / 12);
-    if (m > 1 && (m - 1) % 12 === 0) {
-      currentAge++; 
-    }
+    if (m > 1 && (m - 1) % 12 === 0) currentAge++; 
 
     // 安達保單帳戶管理費率 (階梯式)
     let accMaintenanceRate = 0;
@@ -187,35 +189,49 @@ export function calculateChubbLumpSum({ lumpSum, annualRate, years, age, gender,
     else if (yearIndex === 3 || yearIndex === 4) accMaintenanceRate = 0.0013; // 0.13%
     else accMaintenanceRate = 0; // 第5年起為0
 
-    const maintenanceFee = accountValue * accMaintenanceRate;
-    
-    // 甲型 NAR 計算壽險成本 (借用十來旺費率基底)
-    let nar = Math.max(faceAmount - accountValue, 0); 
-    let costPerTenThousand = getInsuranceCostPerTenThousand(currentAge, gender);
-    let monthlyInsuranceCost = (nar / 10000) * costPerTenThousand;
-
-    // 固定 100 管理費 (高保費可免收)
+    const costPerTenThousand = getInsuranceCostPerTenThousand(currentAge, gender);
     const fixedFee = isHighPremium ? 0 : 100;
 
-    accountValue -= (maintenanceFee + monthlyInsuranceCost + fixedFee);
-    if (accountValue < 0) accountValue = 0;
+    // --- Scenario A: 單筆滾存 (Accumulation) ---
+    const accMaintFee = accValue * accMaintenanceRate;
+    let narAcc = Math.max(faceAmount - accValue, 0); 
+    let monthlyInsCostAcc = (narAcc / 10000) * costPerTenThousand;
 
-    // 基金複利
-    accountValue = accountValue * (1 + monthlyRate);
+    accValue -= (accMaintFee + monthlyInsCostAcc + fixedFee);
+    if (accValue < 0) accValue = 0;
+    accValue = accValue * (1 + monthlyRate); // 全額滾存
+
+    // --- Scenario B: 單筆月配息 (Dividend Distribution) ---
+    const divMaintFee = divValue * accMaintenanceRate;
+    let narDiv = Math.max(faceAmount - divValue, 0); 
+    let monthlyInsCostDiv = (narDiv / 10000) * costPerTenThousand;
+
+    divValue -= (divMaintFee + monthlyInsCostDiv + fixedFee);
+    if (divValue < 0) divValue = 0;
+    const thisMonthDiv = divValue * monthlyRate; // 發配息
+    totalDivDistributed += thisMonthDiv;
+    // divValue 原金維持不變
 
     // 記錄
     if (m % 12 === 0) {
       history.push({
         year: yearIndex,
         age: currentAge,
-        accountValue: Math.round(accountValue),
-        maintenanceFeeEst: Math.round(maintenanceFee * 12),
-        insuranceCostEst: Math.round(monthlyInsuranceCost * 12)
+        accValue: Math.round(accValue),
+        divValue: Math.round(divValue),
+        totalDivDistributed: Math.round(totalDivDistributed)
       });
     }
   }
 
-  return { totalInvested: lumpSum, finalValue: accountValue, history };
+  return { 
+    totalInvested: lumpSum,
+    accFinalValue: accValue,
+    divPrincipal: divValue,
+    divTotalDistributed: totalDivDistributed,
+    divTotalAsset: divValue + totalDivDistributed,
+    history 
+  };
 }
 
 // -------------------------------------------------------------
