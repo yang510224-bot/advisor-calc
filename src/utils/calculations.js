@@ -268,7 +268,8 @@ export function calculateArbitrage({
   loanYears,       // 信貸年期 (如 7)
   loanRate,        // 信貸利率 (如 3%)
   dividendRate,    // 單筆配息率 (如 7%)
-  sipType,         // 'bank' or 'insurance'
+  sipType,         // 'bank' or 'insurance' or 'lumpsum'
+  sipRate,         // 標的報酬率
   age, gender, faceAmount // 若為 insurance 才需要
 }) {
   const months = loanYears * 12;
@@ -288,22 +289,43 @@ export function calculateArbitrage({
   // (這是一種解讀：用配息全買定額，自己拿薪水繳信貸)
   const totalOutofPocket = monthlyLoanPmt * months;
 
+  // 若為單筆滾存不配息
+  if (sipType === 'lumpsum') {
+    const sumResult = calculateChubbLumpSum({
+      lumpSum: loanAmount,
+      annualRate: sipRate, 
+      years: loanYears,
+      age: age,
+      gender: gender,
+      faceAmount: faceAmount,
+      isHighPremium: true,
+      reinvestType: 'none'
+    });
+    return {
+      monthlyLoanPmt: Math.round(monthlyLoanPmt),
+      monthlyDividend: 0,
+      netMonthlyCashflow: Math.round(-monthlyLoanPmt),
+      totalOutofPocket: Math.round(monthlyLoanPmt * months),
+      sipFinalValue: Math.round(sumResult.accFinalValue),
+      remainingPrincipal: 0,
+      finalTotalAsset: Math.round(sumResult.accFinalValue),
+      profit: Math.round(sumResult.accFinalValue - (monthlyLoanPmt * months))
+    };
+  }
+
   // 4. 配息轉往定期定額的終值 (Bank or Insurance)
   let sipResult;
   if (sipType === 'bank') {
     sipResult = calculateBankSIP({
       monthlyInvestment: monthlyDividend,
-      annualRate: 6, // 假設 0050 預期投報 6%
+      annualRate: sipRate, 
       years: loanYears
     });
   } else {
-    // 若為投資型，為了火力展示，假設全部當「超額保費」(因為目標保費要繳費期長才划算)
-    // 但通常定期定額還是要有目標保費。為求簡化，此處模擬「全額投目標保費」或「讓使用者可選」
-    // 此版本預設：70%目標保費，30%超額保費 作為展示
     sipResult = calculateAllianzSIP({
       targetPremium: monthlyDividend * 0.7,
       excessPremium: monthlyDividend * 0.3,
-      annualRate: 6,
+      annualRate: sipRate,
       years: loanYears,
       age, gender, faceAmount
     });
@@ -325,6 +347,102 @@ export function calculateArbitrage({
     sipFinalValue: Math.round(sipResult.finalValue), // 養出來的雞
     remainingPrincipal: Math.round(remainingPrincipal), // 原本的大額本金
     finalTotalAsset: Math.round(finalTotalAsset), // 貸款結清後，淨擁有的雙重資產！
+    profit: Math.round(finalTotalAsset - totalOutofPocket)
+  };
+}
+
+// -------------------------------------------------------------
+// 6. 房貸套利綜合試算 (Mortgage Arbitrage Engine)
+// -------------------------------------------------------------
+export function calculateMortgageArbitrage({
+  mortgageType,    // 'grace' or 'interest_only'
+  loanAmount,
+  loanYears,
+  loanRate,
+  graceYears,
+  dividendRate,
+  sipType,
+  sipRate,
+  age, gender, faceAmount
+}) {
+  const months = loanYears * 12;
+  const graceMonths = graceYears * 12;
+  const moLoanRate = (loanRate / 100) / 12;
+  
+  let pmtGrace = 0;
+  let pmtPostGrace = 0;
+  let totalOutofPocket = 0;
+  
+  if (mortgageType === 'interest_only') {
+    pmtGrace = loanAmount * moLoanRate;
+    pmtPostGrace = pmtGrace;
+    totalOutofPocket = pmtGrace * months;
+  } else {
+    pmtGrace = loanAmount * moLoanRate;
+    const postGraceMonths = months - graceMonths;
+    pmtPostGrace = postGraceMonths > 0 ? calculatePMT(loanAmount, loanRate, loanYears - graceYears) : 0;
+    totalOutofPocket = (pmtGrace * graceMonths) + (pmtPostGrace * postGraceMonths);
+  }
+
+  const monthlyDividend = (loanAmount * (dividendRate / 100)) / 12;
+  const netCashflowGrace = monthlyDividend - pmtGrace;
+  const netCashflowPost = monthlyDividend - pmtPostGrace;
+
+  if (sipType === 'lumpsum') {
+    const sumResult = calculateChubbLumpSum({
+      lumpSum: loanAmount,
+      annualRate: sipRate, 
+      years: loanYears,
+      age: age,
+      gender: gender,
+      faceAmount: faceAmount,
+      isHighPremium: true,
+      reinvestType: 'none'
+    });
+    return {
+      pmtGrace: Math.round(pmtGrace),
+      pmtPostGrace: Math.round(pmtPostGrace),
+      monthlyDividend: 0,
+      netCashflowGrace: Math.round(-pmtGrace),
+      netCashflowPost: Math.round(-pmtPostGrace),
+      totalOutofPocket: Math.round(totalOutofPocket),
+      sipFinalValue: Math.round(sumResult.accFinalValue),
+      remainingPrincipal: 0,
+      finalTotalAsset: Math.round(sumResult.accFinalValue),
+      profit: Math.round(sumResult.accFinalValue - totalOutofPocket)
+    };
+  }
+
+  let sipResult;
+  if (sipType === 'bank') {
+    sipResult = calculateBankSIP({
+      monthlyInvestment: monthlyDividend,
+      annualRate: sipRate,
+      years: loanYears
+    });
+  } else {
+    sipResult = calculateAllianzSIP({
+      targetPremium: monthlyDividend * 0.7,
+      excessPremium: monthlyDividend * 0.3,
+      annualRate: sipRate,
+      years: loanYears,
+      age, gender, faceAmount
+    });
+  }
+
+  const remainingPrincipal = loanAmount; 
+  const finalTotalAsset = remainingPrincipal + sipResult.finalValue;
+
+  return {
+    pmtGrace: Math.round(pmtGrace),
+    pmtPostGrace: Math.round(pmtPostGrace),
+    monthlyDividend: Math.round(monthlyDividend),
+    netCashflowGrace: Math.round(netCashflowGrace),
+    netCashflowPost: Math.round(netCashflowPost),
+    totalOutofPocket: Math.round(totalOutofPocket),
+    sipFinalValue: Math.round(sipResult.finalValue),
+    remainingPrincipal: Math.round(remainingPrincipal),
+    finalTotalAsset: Math.round(finalTotalAsset),
     profit: Math.round(finalTotalAsset - totalOutofPocket)
   };
 }
