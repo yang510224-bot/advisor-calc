@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { calculatePMT, calculateBankSIP, calculateAllianzSIP, calculateChubbLumpSum, calculateArbitrage } from '../utils/calculations';
+import { calculatePMT, calculateBankSIP, calculateAllianzSIP, calculateChubbLumpSum, calculateArbitrage, getMinimumFaceAmountRatio } from '../utils/calculations';
 
 export default function AdvisorCalculator() {
   const [activeTab, setActiveTab] = useState('sip'); // sip, lumpsum, loan, arbitrage
@@ -82,10 +82,13 @@ export default function AdvisorCalculator() {
     setSipResult({ bank: bankSip, allianz: allianzSip });
 
     // 2. LumpSum Recalc
+    const chubbRatio = getMinimumFaceAmountRatio(lumpSumParams.age);
+    const chubbFaceAmount = lumpSumParams.lumpSum * chubbRatio;
     const chubbSum = calculateChubbLumpSum({
-      ...lumpSumParams
+      ...lumpSumParams,
+      faceAmount: chubbFaceAmount
     });
-    setLumpResult(chubbSum);
+    setLumpResult({...chubbSum, currentRatio: chubbRatio, autoFaceAmount: chubbFaceAmount});
 
     // 3. Loan Recalc
     setLoanPmt(calculatePMT(loanParams.amount, loanParams.rate, loanParams.years));
@@ -205,10 +208,25 @@ export default function AdvisorCalculator() {
               </div>
             </div>
 
+              <div className="form-group" style={{ flex: '1 1 30%' }}>
+                <label className="form-label">年紀與性別</label>
+                <div className="flex gap-2">
+                  <input type="number" className="form-input" value={lumpSumParams.age} onChange={e => updateLump('age', e.target.value)} />
+                  <select className="form-input" value={lumpSumParams.gender} onChange={e => updateLump('gender', e.target.value)}>
+                    <option value="M">男性</option>
+                    <option value="F">女性</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
               <div className="form-group" style={{ flex: '1 1 30%' }}>
-                <label className="form-label">設定身故保額 (元)</label>
-                <input type="number" className="form-input" value={lumpSumParams.faceAmount} onChange={e => updateLump('faceAmount', e.target.value)} />
+                <label className="form-label">自動核算身故保額 (元)</label>
+                <div className="flex gap-2 align-center">
+                  <input type="text" className="form-input" value={formatMoney(lumpResult.autoFaceAmount)} disabled style={{ background: '#edf2f7', cursor: 'not-allowed', color: '#4a5568' }} />
+                  <span style={{ whiteSpace: 'nowrap', color: 'var(--primary-dark)', fontWeight: 'bold' }}>({Math.round(lumpResult.currentRatio * 100)}%)</span>
+                </div>
               </div>
               <div className="form-group" style={{ flex: '1 1 30%' }}>
                 <label className="form-label">此筆為「高保費」級距？</label>

@@ -11,6 +11,15 @@ export function calculatePMT(principal, annualRate, years) {
   return (principal * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
 }
 
+// 取得台灣投資型壽險最低身故保額門檻 (第五解約金規定)
+export function getMinimumFaceAmountRatio(age) {
+  if (age <= 30) return 1.9;
+  if (age <= 40) return 1.6;
+  if (age <= 50) return 1.4;
+  if (age <= 70) return 1.2;
+  return 1.01;
+}
+
 // 內部真實年齡費率對照表 (引用自十來旺附表二，單位：每萬淨危險保額)
 const insuranceRates = {
   male: {
