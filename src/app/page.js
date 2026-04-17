@@ -55,13 +55,16 @@ export default function AdvisorCalculator() {
 
   // Mortgage Params
   const [mortgageParams, setMortgageParams] = useState({
-    mortgageType: 'grace', // grace, interest_only
-    loanAmount: 10000000,
-    loanYears: 30, // Usually 30 years
-    loanRate: 2.1,
-    graceYears: 3,
-    dividendRate: 7,
-    sipRate: 6,
+    partA_amount: 2000000,
+    partA_rate: 2.1,
+    partA_years: 20,
+    partB_amount: 3200000,
+    partB_rate: 2.5,
+    partB_years: 30,
+    partB_graceYears: 3,
+    investAmount: 3200000, // 通常用戶把增貸那出來投資
+    dividendRate: 7.5,
+    sipRate: 8,
     sipType: 'bank',
     faceAmount: 2500000,
     age: 34,
@@ -73,7 +76,7 @@ export default function AdvisorCalculator() {
   const updateLump = (key, val) => setLumpSumParams(prev => ({ ...prev, [key]: key === 'gender' || key === 'reinvestType' ? val : (val === 'true' ? true : (val === 'false' ? false : Number(val))) }));
   const updateLoan = (key, val) => setLoanParams(prev => ({ ...prev, [key]: key === 'type' ? val : Number(val) }));
   const updateArb = (key, val) => setArbitrageParams(prev => ({ ...prev, [key]: key === 'sipType' || key === 'gender' ? val : Number(val) }));
-  const updateMort = (key, val) => setMortgageParams(prev => ({ ...prev, [key]: key === 'sipType' || key === 'gender' || key === 'mortgageType' ? val : Number(val) }));
+  const updateMort = (key, val) => setMortgageParams(prev => ({ ...prev, [key]: key === 'sipType' || key === 'gender' ? val : Number(val) }));
 
   // Results
   const [sipResult, setSipResult] = useState(null);
@@ -484,119 +487,135 @@ export default function AdvisorCalculator() {
         {/* TAB 5: 房貸套利印鈔機 */}
         {activeTab === 'mortgage' && mortgageResult && (
           <div className="card">
-            <h2>🏠 房貸印鈔機 (活化不動產轉保險利差)</h2>
-            <p style={{ color: 'var(--text-light)', marginBottom: '24px' }}>活化不動產淨值，搭配銀行寬限期或理財型房貸，將房貸資金轉作美元債或高配息保單，賺取利差並加掛巨大防護罩。</p>
+            <h2>🏠 雙效房貸印鈔機 (活化不動產轉保險利差)</h2>
+            <p style={{ color: 'var(--text-light)', marginBottom: '24px' }}>精準拆解「原房貸本息攤還」加上「新轉增貸寬限期」，並將剩餘正向現金流轉入防禦單。</p>
             
-            <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '8px' }}>第一步：房貸專案參數</h3>
-            <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
-              <div className="form-group" style={{ flex: '1 1 30%' }}>
-                  <label className="form-label">房貸類型</label>
-                  <select className="form-input" value={mortgageParams.mortgageType} onChange={e => updateMort('mortgageType', e.target.value)}>
-                    <option value="grace">一般房貸 (附寬限期型)</option>
-                    <option value="interest_only">理財型房貸 (全程只繳息)</option>
-                  </select>
-              </div>
-              <div className="form-group" style={{ flex: '1 1 30%' }}>
-                  <label className="form-label">增/房貸總額 (元)</label>
-                  <input type="number" className="form-input" value={mortgageParams.loanAmount} onChange={e => updateMort('loanAmount', e.target.value)} />
-              </div>
-              <div className="form-group" style={{ flex: '1 1 30%' }}>
-                  <label className="form-label">房貸總年期 (年)</label>
-                  <input type="number" className="form-input" value={mortgageParams.loanYears} onChange={e => updateMort('loanYears', e.target.value)} />
-              </div>
-              <div className="form-group" style={{ flex: '1 1 30%' }}>
-                  <label className="form-label">房貸利率 (%)</label>
-                  <input type="number" className="form-input" value={mortgageParams.loanRate} onChange={e => updateMort('loanRate', e.target.value)} />
-              </div>
-              {mortgageParams.mortgageType === 'grace' && (
-                <div className="form-group" style={{ flex: '1 1 30%' }}>
-                    <label className="form-label">寬限期 (年) [不在此列則免填]</label>
-                    <input type="number" className="form-input" value={mortgageParams.graceYears} onChange={e => updateMort('graceYears', e.target.value)} />
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              {/* Part A */}
+              <div style={{ flex: '1 1 45%', padding: '16px', background: 'rgba(0,0,0,0.02)', borderRadius: '8px' }}>
+                <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '8px' }}>區塊 A：原房貸 (本息攤還剩餘)</h3>
+                <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
+                  <div className="form-group" style={{ flex: '1 1 100%' }}>
+                      <label className="form-label">剩餘房貸總額 (元)</label>
+                      <input type="number" className="form-input" value={mortgageParams.partA_amount} onChange={e => updateMort('partA_amount', e.target.value)} />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 45%' }}>
+                      <label className="form-label">剩餘年期 (年)</label>
+                      <input type="number" className="form-input" value={mortgageParams.partA_years} onChange={e => updateMort('partA_years', e.target.value)} />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 45%' }}>
+                      <label className="form-label">利率 (%)</label>
+                      <input type="number" className="form-input" value={mortgageParams.partA_rate} onChange={e => updateMort('partA_rate', e.target.value)} />
+                  </div>
                 </div>
-              )}
+                <div style={{ marginTop: '8px', fontSize: '13px', color: '#718096' }}>*若無原房貸，請填 0</div>
+              </div>
+
+              {/* Part B */}
+              <div style={{ flex: '1 1 45%', padding: '16px', background: 'rgba(0,0,0,0.02)', borderRadius: '8px' }}>
+                <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '8px' }}>區塊 B：本次理財增貸 (寬限 / 理財型)</h3>
+                <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
+                  <div className="form-group" style={{ flex: '1 1 100%' }}>
+                      <label className="form-label">增貸總金 (元)</label>
+                      <input type="number" className="form-input" value={mortgageParams.partB_amount} onChange={e => updateMort('partB_amount', e.target.value)} />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 30%' }}>
+                      <label className="form-label">年期 (年)</label>
+                      <input type="number" className="form-input" value={mortgageParams.partB_years} onChange={e => updateMort('partB_years', e.target.value)} />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 30%' }}>
+                      <label className="form-label">寬限期 (年)</label>
+                      <input type="number" className="form-input" value={mortgageParams.partB_graceYears} onChange={e => updateMort('partB_graceYears', e.target.value)} title="若高於年期即為全程理財型" />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 30%' }}>
+                      <label className="form-label">利率 (%)</label>
+                      <input type="number" className="form-input" value={mortgageParams.partB_rate} onChange={e => updateMort('partB_rate', e.target.value)} />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '8px', marginTop: '16px' }}>第二步：投資標的與配息動向</h3>
+            <h3 style={{ borderBottom: '2px solid var(--border-color)', paddingBottom: '8px', marginTop: '24px' }}>投資部位配置</h3>
             <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
-              <div className="form-group" style={{ flex: '1 1 30%' }}>
-                  <label className="form-label">母單：年配息率 (%)</label>
+              <div className="form-group" style={{ flex: '1 1 20%' }}>
+                  <label className="form-label">投資本金 (元)</label>
+                  <input type="number" className="form-input" value={mortgageParams.investAmount} onChange={e => updateMort('investAmount', e.target.value)} />
+              </div>
+              <div className="form-group" style={{ flex: '1 1 20%' }}>
+                  <label className="form-label">母單配息率 (%)</label>
                   <input type="number" className="form-input" value={mortgageParams.dividendRate} onChange={e => updateMort('dividendRate', e.target.value)} />
               </div>
               <div className="form-group" style={{ flex: '1 1 30%' }}>
-                  <label className="form-label">配息投入動向</label>
+                  <label className="form-label">盈餘正現金流動向</label>
                   <select className="form-input" value={mortgageParams.sipType} onChange={e => updateMort('sipType', e.target.value)}>
                     <option value="bank">分流定額：一般銀行定額 (0成本)</option>
                     <option value="insurance">分流定額：投資型定額 (雙重防護網)</option>
-                    <option value="lumpsum">直接滾存：單筆大額不配息 (全額複利)</option>
+                    <option value="lumpsum">直接滾存：單筆不配息直接複利</option>
                   </select>
               </div>
-              <div className="form-group" style={{ flex: '1 1 30%' }}>
-                  <label className="form-label">標的：預期年化報酬 (%)</label>
+              <div className="form-group" style={{ flex: '1 1 20%' }}>
+                  <label className="form-label">標的預期報酬 (%)</label>
                   <input type="number" className="form-input" value={mortgageParams.sipRate} onChange={e => updateMort('sipRate', e.target.value)} />
               </div>
             </div>
 
             <div style={{ marginTop: '32px', background: 'var(--white)', border: '2px solid var(--primary-color)', borderRadius: '12px', padding: '24px' }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '8px' }}>🏦 {mortgageParams.loanYears} 年套利與現金流決算</h2>
-                <div style={{ textAlign: 'center', color: '#718096', fontSize: '14px', marginBottom: '24px' }}>每月母單配息將產生：<strong style={{ color: '#2d3748', fontSize: '18px' }}>{formatMoney(mortgageResult.monthlyDividend)}</strong></div>
+                <h2 style={{ textAlign: 'center', marginBottom: '8px' }}>🏦 {Math.max(mortgageParams.partA_years, mortgageParams.partB_years)} 年雙效房貸套利大決算</h2>
+                <div style={{ textAlign: 'center', color: '#718096', fontSize: '14px', marginBottom: '24px' }}>每月母單配息 ({mortgageParams.sipType === 'lumpsum' ? '全域滾存不領出' : '現金流領出'})：<strong style={{ color: '#2d3748', fontSize: '18px' }}>{formatMoney(mortgageResult.monthlyDividend)}</strong></div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
                   
                   {/* 付出與現金流 */}
                   <div style={{ flex: '1 1 45%', padding: '16px', background: 'rgba(217, 119, 6, 0.05)', borderRadius: '8px' }}>
-                    <h3 style={{ color: '#b45309', textAlign: 'center' }}>💸 房貸繳款與現金流盈虧</h3>
+                    <h3 style={{ color: '#b45309', textAlign: 'center' }}>💸 房貸繳款與精算現金流</h3>
                     
-                    {mortgageParams.mortgageType === 'grace' ? (
-                       <>
-                         <div style={{ marginTop: '16px' }}>
-                           <strong style={{ color: '#92400e' }}>前 {mortgageParams.graceYears} 年 (寬限期)</strong><br/>
-                           每月房貸：{formatMoney(mortgageResult.pmtGrace)}<br/>
-                           每月現金流 (配息已扣除房貸)：
-                           <span className={mortgageResult.netCashflowGrace >= 0 ? "text-success" : "text-danger"}>
-                             {formatMoney(mortgageResult.netCashflowGrace)}
-                           </span>
-                         </div>
-                         <div style={{ marginTop: '16px' }}>
-                           <strong style={{ color: '#92400e' }}>第 {mortgageParams.graceYears + 1} 年起 (本息攤還)</strong><br/>
-                           每月房貸：{formatMoney(mortgageResult.pmtPostGrace)}<br/>
-                           每月現金流 (配息已扣除房貸)：
-                           <span className={mortgageResult.netCashflowPost >= 0 ? "text-success" : "text-danger"}>
-                             {formatMoney(mortgageResult.netCashflowPost)}
-                           </span>
-                         </div>
-                       </>
-                    ) : (
+                     <>
                        <div style={{ marginTop: '16px' }}>
-                         <strong style={{ color: '#92400e' }}>全程理財型 (只繳息)</strong><br/>
-                         每月房貸：{formatMoney(mortgageResult.pmtGrace)}<br/>
-                         每月淨現金流 (盈餘或缺口)：
+                         <strong style={{ color: '#92400e' }}>第一階段 (前 {mortgageParams.partB_graceYears} 年增貸寬限期內)</strong><br/>
+                         A區 + B區 每月房貸本息：{formatMoney(mortgageResult.pmtTotalGrace)}<br/>
+                         每月淨現金流 (配息已扣除房貸)：
                          <span className={mortgageResult.netCashflowGrace >= 0 ? "text-success" : "text-danger"}>
                            {formatMoney(mortgageResult.netCashflowGrace)}
                          </span>
+                         {mortgageResult.netCashflowGrace > 0 && mortgageParams.sipType !== 'lumpsum' && (
+                           <div style={{ fontSize: '12px', color: 'gray' }}>*(盈餘將自動轉入定額系統)*</div>
+                         )}
                        </div>
-                    )}
+                       
+                       {mortgageParams.partB_graceYears < mortgageParams.partB_years && (
+                         <div style={{ marginTop: '16px' }}>
+                           <strong style={{ color: '#92400e' }}>第二階段 (第 {mortgageParams.partB_graceYears + 1} 年起 B 區本息攤還)</strong><br/>
+                           A區 + B區 每月房貸本息：{formatMoney(mortgageResult.pmtTotalPost)}<br/>
+                           每月淨現金流 (配息已扣除房貸)：
+                           <span className={mortgageResult.netCashflowPost >= 0 ? "text-success" : "text-danger"}>
+                             {formatMoney(mortgageResult.netCashflowPost)}
+                           </span>
+                           {mortgageResult.netCashflowPost > 0 && mortgageParams.sipType !== 'lumpsum' && (
+                             <div style={{ fontSize: '12px', color: 'gray' }}>*(盈餘將自動轉入定額系統)*</div>
+                           )}
+                         </div>
+                       )}
+                     </>
                     
                     <div style={{ textAlign: 'center', marginTop: '24px', paddingTop: '16px', borderTop: '1px dashed #d97706'}}>
-                      <div style={{ fontSize: '14px' }}>{mortgageParams.loanYears} 年自掏腰包總負擔 (房貸本利總額):</div>
+                      <div style={{ fontSize: '14px' }}>累積因現金流呈負值而「私人自掏腰包」總填補缺口:</div>
                       <div className="text-danger" style={{ fontSize: '24px', fontWeight: 'bold' }}>{formatMoney(mortgageResult.totalOutofPocket)}</div>
                     </div>
                   </div>
 
                   {/* 收穫端 */}
                   <div style={{ flex: '1 1 45%', padding: '16px', background: 'rgba(46, 125, 50, 0.05)', borderRadius: '8px' }}>
-                    <h3 style={{ color: 'var(--success-color)', textAlign: 'center' }}>🏆 最終總資產結算</h3>
-                    <p style={{ textAlign: 'center', fontSize: '14px', marginBottom: '16px'}}>
-                      {mortgageParams.sipType === 'lumpsum' ? '全額母單滾存後價值' : '借來的房款本金底座加上子單系統'}
-                    </p>
-                    <div style={{ marginBottom: '8px' }}>
-                      {mortgageParams.sipType !== 'lumpsum' && (
-                        <>✓ 母單本金底座：{formatMoney(mortgageResult.remainingPrincipal)} <br/></>
-                      )}
-                      ✓ {mortgageParams.sipType === 'lumpsum' ? '單筆滾存大金庫' : '定額系統最終淨值'}：{formatMoney(mortgageResult.sipFinalValue)}
+                    <h3 style={{ color: 'var(--success-color)', textAlign: 'center' }}>🏆 總資產淨值結算</h3>
+                    
+                    <div style={{ marginBottom: '8px', lineHeight: '2' }}>
+                      ✓ 大單部位最終價值：{formatMoney(mortgageResult.finalMotherValue)} <br/>
+                      ✓ 定額部位最終價值：{formatMoney(mortgageResult.finalSipValue)} <br/>
+                      <strong>【綜合總資產規模：{formatMoney(mortgageResult.totalGrossAsset)}】</strong><br/>
+                      <span style={{ color: 'var(--danger-color)' }}>➖ 尚未還清之銀行債務：{formatMoney(mortgageResult.totalRemainingDebt)}</span>
                     </div>
-                    <div style={{ textAlign: 'center', marginTop: '16px'}}>
-                      <div style={{ fontSize: '14px' }}>{mortgageParams.loanYears} 年後，實質擁有現金資產:</div>
-                      <div className="text-success" style={{ fontSize: '28px', fontWeight: 'bold' }}>{formatMoney(mortgageResult.finalTotalAsset)}</div>
+                    <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(46, 125, 50, 0.2)' }}>
+                      <div style={{ fontSize: '14px' }}>最終【總資產 減 剩餘總負債】真實淨值資產:</div>
+                      <div className="text-success" style={{ fontSize: '28px', fontWeight: 'bold' }}>{formatMoney(mortgageResult.netAsset)}</div>
                     </div>
                   </div>
                 </div>
@@ -604,10 +623,10 @@ export default function AdvisorCalculator() {
                 {/* 淨算結語 */}
                 <div style={{ textAlign: 'center', paddingTop: '16px', borderTop: '1px dashed var(--border-color)' }}>
                   <p style={{ fontSize: '18px' }}>
-                    👉 用這棟房子的 {formatMoney(mortgageParams.loanAmount)} 轉做資本運作，支付了 <strong>{formatMoney(mortgageResult.totalOutofPocket)}</strong> 的房貸，
+                    👉 當初投入本金為 {formatMoney(mortgageParams.investAmount)}。
                   </p>
-                  <p style={{ fontSize: '18px' }}>
-                    結清房貸後，還倒賺了高達 <strong>{formatMoney(mortgageResult.profit)}</strong> 的龐大利差資產！
+                  <p style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-dark)', marginTop: '8px' }}>
+                    總利差創造：+{formatMoney(mortgageResult.profit)}
                   </p>
                 </div>
             </div>
