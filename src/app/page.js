@@ -51,8 +51,8 @@ export default function AdvisorCalculator() {
   });
 
   // UI Updates helper
-  const updateSip = (key, val) => setSipParams(prev => ({ ...prev, [key]: Number(val) }));
-  const updateLump = (key, val) => setLumpSumParams(prev => ({ ...prev, [key]: val === 'true' ? true : (val === 'false' ? false : Number(val)) }));
+  const updateSip = (key, val) => setSipParams(prev => ({ ...prev, [key]: key === 'gender' ? val : Number(val) }));
+  const updateLump = (key, val) => setLumpSumParams(prev => ({ ...prev, [key]: key === 'gender' ? val : (val === 'true' ? true : (val === 'false' ? false : Number(val))) }));
   const updateLoan = (key, val) => setLoanParams(prev => ({ ...prev, [key]: key === 'type' ? val : Number(val) }));
   const updateArb = (key, val) => setArbitrageParams(prev => ({ ...prev, [key]: key === 'sipType' || key === 'gender' ? val : Number(val) }));
 
