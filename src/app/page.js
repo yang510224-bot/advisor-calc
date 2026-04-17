@@ -308,9 +308,15 @@ export default function AdvisorCalculator() {
                         🔹 其中定額滾存終值：<span className="text-success">{formatMoney(lumpResult.reinvestResult.finalValue)}</span>
                       </div>
                       {lumpSumParams.reinvestType === 'insurance' && lumpResult.reinvestResult.faceAmount && (
-                        <div style={{ fontSize: '14px', color: '#d97706', marginTop: '6px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          🛡️ 額外獲得防護罩：<span style={{ fontSize: '16px' }}>{formatMoney(lumpResult.reinvestResult.faceAmount)}</span>
-                        </div>
+                        <>
+                          <div style={{ fontSize: '14px', color: '#d97706', marginTop: '6px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            🛡️ 額外獲得子單防護：<span style={{ fontSize: '16px' }}>{formatMoney(lumpResult.reinvestResult.faceAmount)}</span>
+                          </div>
+                          <div style={{ fontSize: '15px', color: '#b45309', marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed rgba(217,119,6,0.3)', fontWeight: 'bold' }}>
+                            🔥 萬一發生意外，【母單＋子單】共計將理賠約：<br/>
+                            <span style={{ fontSize: '24px', color: '#ea580c' }}>{formatMoney(lumpResult.autoFaceAmount + lumpSumParams.reinvestFaceAmount)}</span>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
