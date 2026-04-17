@@ -28,7 +28,8 @@ export default function AdvisorCalculator() {
     faceAmount: 2500000,
     isHighPremium: true,
     reinvestType: 'none',
-    reinvestRate: 6
+    reinvestRate: 6,
+    reinvestFaceAmount: 2000000
   });
 
   // Loan Params
@@ -284,7 +285,10 @@ export default function AdvisorCalculator() {
                       <option value="insurance">配息全投入 投資型定額 (安聯)</option>
                     </select>
                     {lumpSumParams.reinvestType !== 'none' && (
-                      <input type="number" className="form-input" style={{ flex: '1', padding: '8px', fontSize: '13px' }} value={lumpSumParams.reinvestRate} onChange={e => updateLump('reinvestRate', e.target.value)} placeholder="投報率%" />
+                      <input type="number" className="form-input" style={{ flex: '1', padding: '8px', fontSize: '13px' }} value={lumpSumParams.reinvestRate} onChange={e => updateLump('reinvestRate', e.target.value)} title="自訂投報率%" placeholder="投報率%" />
+                    )}
+                    {lumpSumParams.reinvestType === 'insurance' && (
+                      <input type="number" className="form-input" style={{ flex: '1', padding: '8px', fontSize: '13px' }} value={lumpSumParams.reinvestFaceAmount} onChange={e => updateLump('reinvestFaceAmount', e.target.value)} title="自訂新單保額" placeholder="新單保額" />
                     )}
                   </div>
                 </div>
