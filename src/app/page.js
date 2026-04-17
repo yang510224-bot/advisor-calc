@@ -192,7 +192,7 @@ export default function AdvisorCalculator() {
         {/* TAB 2: 單筆大額 */}
         {activeTab === 'lumpsum' && lumpResult && (
           <div className="card">
-            <h2>安達富貴大贏家 - 單筆滾存 (不配息)</h2>
+            <h2>安Ｘ富貴大Ｘ家 - 單筆滾存 (不配息)</h2>
             <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
               <div className="form-group" style={{ flex: '1 1 30%' }}>
                 <label className="form-label">單筆投入資金 (元)</label>
@@ -263,7 +263,7 @@ export default function AdvisorCalculator() {
               </div>
             </div>
             
-            <p style={{ color: 'var(--text-light)', textAlign: 'center', marginTop: '16px', fontSize: '13px' }}>*以上試算皆已精準涵蓋安達前四年 (0.2% ~ 0.13%) 資金管理費階梯遞減、以及每月隨保單價值與年紀變動之甲型危險保費核算。</p>
+            <p style={{ color: 'var(--text-light)', textAlign: 'center', marginTop: '16px', fontSize: '13px' }}>*以上試算皆已精準涵蓋安Ｘ前四年 (0.2% ~ 0.13%) 資金管理費階梯遞減、以及每月隨保單價值與年紀變動之甲型危險保費核算。</p>
           </div>
         )}
 
