@@ -26,7 +26,9 @@ export default function AdvisorCalculator() {
     age: 34,
     gender: 'M',
     faceAmount: 2500000,
-    isHighPremium: true
+    isHighPremium: true,
+    reinvestType: 'none',
+    reinvestRate: 6
   });
 
   // Loan Params
@@ -52,7 +54,7 @@ export default function AdvisorCalculator() {
 
   // UI Updates helper
   const updateSip = (key, val) => setSipParams(prev => ({ ...prev, [key]: key === 'gender' ? val : Number(val) }));
-  const updateLump = (key, val) => setLumpSumParams(prev => ({ ...prev, [key]: key === 'gender' ? val : (val === 'true' ? true : (val === 'false' ? false : Number(val))) }));
+  const updateLump = (key, val) => setLumpSumParams(prev => ({ ...prev, [key]: key === 'gender' || key === 'reinvestType' ? val : (val === 'true' ? true : (val === 'false' ? false : Number(val))) }));
   const updateLoan = (key, val) => setLoanParams(prev => ({ ...prev, [key]: key === 'type' ? val : Number(val) }));
   const updateArb = (key, val) => setArbitrageParams(prev => ({ ...prev, [key]: key === 'sipType' || key === 'gender' ? val : Number(val) }));
 
@@ -257,8 +259,33 @@ export default function AdvisorCalculator() {
                    </div>
                 </div>
                 <div style={{ borderTop: '1px dashed #CBD5E0', paddingTop: '16px' }}>
-                  <div style={{ fontSize: '14px' }}>總資產 (配息＋剩餘本金)：</div>
-                  <div className="text-danger" style={{ fontSize: '28px', fontWeight: 'bold' }}>{formatMoney(lumpResult.divTotalAsset)}</div>
+                  <div style={{ fontSize: '14px' }}>配息動向設定：</div>
+                  <div className="flex gap-2" style={{ marginTop: '8px' }}>
+                    <select className="form-input" style={{ flex: '2', padding: '8px', fontSize: '13px' }} value={lumpSumParams.reinvestType} onChange={e => updateLump('reinvestType', e.target.value)}>
+                      <option value="none">配息全數領出現金</option>
+                      <option value="bank">配息全投入 一般銀行定額</option>
+                      <option value="insurance">配息全投入 投資型定額 (安聯)</option>
+                    </select>
+                    {lumpSumParams.reinvestType !== 'none' && (
+                      <input type="number" className="form-input" style={{ flex: '1', padding: '8px', fontSize: '13px' }} value={lumpSumParams.reinvestRate} onChange={e => updateLump('reinvestRate', e.target.value)} placeholder="投報率%" />
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px dashed #CBD5E0', paddingTop: '16px', marginTop: '16px' }}>
+                  <div style={{ fontSize: '14px' }}>總資產 ({lumpSumParams.reinvestType === 'none' ? '現金配息' : '配息定額終值'} ＋ 剩餘本金)：</div>
+                  <div className="text-danger" style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                    {formatMoney(
+                      lumpSumParams.reinvestType === 'none' 
+                        ? lumpResult.divTotalAsset 
+                        : lumpResult.divPrincipal + (lumpResult.reinvestResult?.finalValue || 0)
+                    )}
+                  </div>
+                  {lumpSumParams.reinvestType !== 'none' && lumpResult.reinvestResult && (
+                    <div style={{ fontSize: '13px', color: '#718096', marginTop: '4px' }}>
+                      (其中定額滾存終值：{formatMoney(lumpResult.reinvestResult.finalValue)})
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

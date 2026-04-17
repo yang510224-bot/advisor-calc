@@ -167,7 +167,7 @@ export function calculateAllianzSIP({ targetPremium, excessPremium, annualRate, 
 // -------------------------------------------------------------
 // 4. 安達富貴大贏家 - 單筆滾存 (Chubb Lump Sum)
 // -------------------------------------------------------------
-export function calculateChubbLumpSum({ lumpSum, annualRate, years, age, gender, faceAmount, isHighPremium = true }) {
+export function calculateChubbLumpSum({ lumpSum, annualRate, years, age, gender, faceAmount, isHighPremium = true, reinvestType = 'none', reinvestRate = 6 }) {
   const months = years * 12;
   const monthlyRate = (annualRate / 100) / 12;
   
@@ -224,12 +224,38 @@ export function calculateChubbLumpSum({ lumpSum, annualRate, years, age, gender,
     }
   }
 
+  // ====================
+  // 配息再投資 (Reinvestment)
+  // ====================
+  let reinvestResult = null;
+  if (reinvestType !== 'none') {
+    const averageDiv = totalDivDistributed / months;
+    if (reinvestType === 'bank') {
+      reinvestResult = calculateBankSIP({
+        monthlyInvestment: averageDiv,
+        annualRate: reinvestRate,
+        years: years
+      });
+    } else if (reinvestType === 'insurance') {
+      reinvestResult = calculateAllianzSIP({
+        targetPremium: averageDiv * 0.7,
+        excessPremium: averageDiv * 0.3,
+        annualRate: reinvestRate,
+        years: years,
+        age: age,
+        gender: gender,
+        faceAmount: (averageDiv * 12) * getMinimumFaceAmountRatio(age)
+      });
+    }
+  }
+
   return { 
     totalInvested: lumpSum,
     accFinalValue: accValue,
     divPrincipal: divValue,
     divTotalDistributed: totalDivDistributed,
     divTotalAsset: divValue + totalDivDistributed,
+    reinvestResult,
     history 
   };
 }
