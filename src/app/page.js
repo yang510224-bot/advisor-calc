@@ -98,7 +98,7 @@ export default function AdvisorCalculator() {
 
   return (
     <div className="container">
-      <h1 style={{ textAlign: 'center', marginBottom: '8px' }}>專業財務顧問計算機 💼</h1>
+      <h1 style={{ textAlign: 'center', marginBottom: '8px' }}>專業財務顧問計算機 💼 <span style={{fontSize:'16px', color:'#718096', fontWeight:'normal'}}>(v2 穩定版)</span></h1>
       <p style={{ textAlign: 'center', color: 'var(--text-light)', marginBottom: '32px' }}>
         高階套利分析與多元理財模組核算引擎
       </p>
