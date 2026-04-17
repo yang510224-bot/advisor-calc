@@ -206,8 +206,6 @@ export default function AdvisorCalculator() {
                 <label className="form-label">滾存年期 (年)</label>
                 <input type="number" className="form-input" value={lumpSumParams.years} onChange={e => updateLump('years', e.target.value)} />
               </div>
-            </div>
-
               <div className="form-group" style={{ flex: '1 1 30%' }}>
                 <label className="form-label">年紀與性別</label>
                 <div className="flex gap-2">
@@ -220,7 +218,7 @@ export default function AdvisorCalculator() {
               </div>
             </div>
 
-            <div className="flex gap-4" style={{ flexWrap: 'wrap' }}>
+            <div className="flex gap-4" style={{ flexWrap: 'wrap', marginTop: '16px' }}>
               <div className="form-group" style={{ flex: '1 1 30%' }}>
                 <label className="form-label">自動核算身故保額 (元)</label>
                 <div className="flex gap-2 align-center">
