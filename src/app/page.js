@@ -187,7 +187,25 @@ export default function AdvisorCalculator() {
                   <p style={{ fontSize: '13px', color: 'var(--text-light)'}}>*已內扣每月100建黨費及動態NAR危險保費</p>
                 </div>
               </div>
+              </div>
             </div>
+
+            <div style={{ marginTop: '24px', padding: '16px', background: '#FEF3C7', borderRadius: '8px', borderLeft: '5px solid #D97706' }}>
+              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#B45309', marginBottom: '8px' }}>
+                🛡️ 深層防護罩價值拆解：買保單值得嗎？
+              </div>
+              <div style={{ fontSize: '15px', color: '#78350f', lineHeight: '1.6' }}>
+                這 {sipParams.years} 年的過程中，若發生走得太早的意外：
+                <ul style={{ paddingLeft: '24px', margin: '8px 0' }}>
+                  <li><strong>銀行定額：</strong> 家屬 <span style={{ color: '#dc2626' }}>僅能領回當時的投資現值</span> (且若逢股災可能還會面臨虧損)。</li>
+                  <li><strong>投資型保單：</strong> 立即啟動高達 <strong style={{ fontSize: '18px', color: '#16a34a' }}>{formatMoney(sipParams.faceAmount)}</strong> 的身故防護罩理賠金！</li>
+                </ul>
+                <div style={{ marginTop: '12px', borderTop: '1px dashed #d97706', paddingTop: '12px' }}>
+                  雖然 {sipParams.years} 年後保單淨值比銀行少了 {formatMoney(Math.max(0, sipResult.bank.finalValue - sipResult.allianz.finalValue))} 左右，但攤提下來，您平均每個月只花了大約 <strong>{formatMoney(Math.max(0, sipResult.bank.finalValue - sipResult.allianz.finalValue) / (sipParams.years * 12))}</strong> 的成本，就幫家庭撐起了幾百萬的巨盾！這是在銀行單純存錢絕對買不到的防護機制。
+                </div>
+              </div>
+            </div>
+
           </div>
         )}
 
