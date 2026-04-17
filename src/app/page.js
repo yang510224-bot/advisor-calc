@@ -187,7 +187,6 @@ export default function AdvisorCalculator() {
                   <p style={{ fontSize: '13px', color: 'var(--text-light)'}}>*已內扣每月100建黨費及動態NAR危險保費</p>
                 </div>
               </div>
-              </div>
             </div>
 
             <div style={{ marginTop: '24px', padding: '16px', background: '#FEF3C7', borderRadius: '8px', borderLeft: '5px solid #D97706' }}>
